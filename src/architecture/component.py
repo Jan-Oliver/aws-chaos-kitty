@@ -2,26 +2,23 @@ from typing import List, Optional
 from dataclasses import dataclass
 
 from src.interfaces.neopixel import NeopixelInterface
-from src.main import ComplianceState, ServiceState
+import src.utils.types as types
 
-@dataclass
-class ConnectionType:
-    state_id: str
-    pixels: List[int]
+
 
 class ArchitectureComponent():
     def __init__(self, 
                  neopixel_client: NeopixelInterface, 
-                 component_connections: Optional[List[ConnectionType]], 
-                 ingoing_connections: Optional[List[ConnectionType]], 
-                 outgoing_connections: Optional[List[ConnectionType]]):
+                 component_connections: Optional[List[types.ConnectionComponent]], 
+                 ingoing_connections: Optional[List[types.ConnectionComponent]], 
+                 outgoing_connections: Optional[List[types.ConnectionComponent]]):
         
         self.neopixel_client = neopixel_client
         self.component_connections = component_connections
         self.ingoing_connections = ingoing_connections
         self.outgoing_connections = outgoing_connections
 
-    def _update_ingoing_connections(self, global_compliance_state: ComplianceState):
+    def _update_ingoing_connections(self, global_compliance_state: types.ComplianceState):
         if not self.ingoing_connections:
             return
         
@@ -31,7 +28,7 @@ class ArchitectureComponent():
             compliance_state = getattr(global_compliance_state, state_id)
             self.neopixel_client.update_connection_pixels(pixels, compliance_state)
 
-    def _update_outgoing_connections(self, global_compliance_state: ComplianceState):
+    def _update_outgoing_connections(self, global_compliance_state: types.ComplianceState):
         if not self.outgoing_connections:
                 return
             
@@ -41,7 +38,7 @@ class ArchitectureComponent():
             compliance_state = getattr(global_compliance_state, state_id)
             self.neopixel_client.update_connection_pixels(pixels, compliance_state)
 
-    def _update_component_connections(self, global_compliance_state: ComplianceState):
+    def _update_component_connections(self, global_compliance_state: types.ComplianceState):
         if not self.component_connections:
                 return
             
@@ -51,7 +48,7 @@ class ArchitectureComponent():
             compliance_state = getattr(global_compliance_state, state_id)
             self.neopixel_client.update_component_pixels(pixels, compliance_state)
 
-    def update(self, global_compliance_state: ComplianceState):
+    def update(self, global_compliance_state: types.ComplianceState):
         self._update_ingoing_connections(global_compliance_state)
         self._update_outgoing_connections(global_compliance_state)
         self._update_component_connections(global_compliance_state)

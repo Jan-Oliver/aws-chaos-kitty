@@ -9,32 +9,16 @@ from typing import Callable
 from awsiot import mqtt5_client_builder
 from awscrt import mqtt5
 
-from src.main import ComplianceState
+from src.utils.types import ComplianceState
 import src.utils.constants as constants 
-@dataclass
-class MqttClientOptionType:
-    """Configuration for the creation of MQTT5 client
-    Account - Frankfurt - IoT Core - Mqtt test client - Raspi4 - Certificates (policy haengt am certificate) - iot receive anpassen bei anderem topic & publish -
-    test client - subscribe auf broker - topic # - testen ob publish klappt -  
-    Args:
-        endpoint (str): Host name of AWS IoT server.
-        port (int): Connection port for direct connection. "AWS IoT supports 443 and 8883.
-        cert_filepath (str): Path to certificate file.
-        pri_key_filepath (str): Path to private key file.
-        client_id (str): Globally unique client id.
-    """
-    endpoint: str
-    port: int
-    cert_filepath: str
-    pri_key_filepath: str
-    client_id: str
+import src.utils.types as types
 
 class MqttClientInterface():
     # TODO: Add types to update state callback
-    def __init__(self, global_compliance_state: ComplianceState, client_options: MqttClientOptionType, subscription_topic: str):
+    def __init__(self, global_compliance_state: ComplianceState, client_options: types.MqttClientOption, subscription_topic: str):
         """
         global_compliance_state (ComplianceState): Global compliance state of the architecture
-        client_options (MqttClientOptionType): Configuration for the creation of MQTT5 client
+        client_options (MqttClientOption): Configuration for the creation of MQTT5 client
         message_topic (str): Filter mask for topics to subscribe to, e.g. "test/topic"
         """
         self.global_compliance_state = global_compliance_state

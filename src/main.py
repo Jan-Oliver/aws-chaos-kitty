@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from dataclasses import dataclass
 import signal
 import sys
 import os
@@ -7,7 +6,6 @@ import time
 
 from typing import List
 from uuid import uuid4
-from enum import Enum
 import RPi.GPIO as GPIO
 
 import src.interfaces.button as button_interface
@@ -15,46 +13,17 @@ import src.interfaces.mqtt as mqtt_interface
 import src.interfaces.neopixel as neopixel_interface
 import src.utils.constants as constants
 import src.architecture.component as architecture
+import src.utils.types as types
 
-
-class ServiceState(Enum):
-    NON_COMPLIANT: 0
-    COMPLIANT: 1
-
-@dataclass
-class ComplianceState:
-    """ Defines compliance state globally - Singleton """
-    # Non-Compliant: Open Application Load Balancer Security Group
-    alb_sec_group_compliant: ServiceState
-    # Non-Compliant: Cloud Trail Turned off
-    cloud_trail_compliant: ServiceState
-    # Non-Compliant: Open Auto Scaling Group Security Group
-    asg_sec_group_compliant: ServiceState
-    # Non-Compliant: Unsafe Role for EC2 Instance in AZ A
-    ec2_instance_2a_compliant: ServiceState
-    # Non-Compliant: Unsafe Role for EC2 Instance in AZ B
-    ec2_instance_2b_compliant: ServiceState
-    # Non-Compliant: Change Relational Database System Authentication
-    rds_db_compliant: ServiceState
-    # Non-Compliant: Open Relational Database System Security Group
-    rds_sec_group_compliant: ServiceState
-    # Non-Compliant: S3 Bucket public
-    s3_bucket_compliant: ServiceState
-    _instance = None
-    def __new__(cls, *args, **kwargs):
-        if not isinstance(cls._instance, cls):
-            cls._instance = super(ComplianceState, cls).__new__(cls)
-        return cls._instance
-
-global_compliance_state: ComplianceState = ComplianceState(
-    alb_sec_group_compliant = ServiceState.COMPLIANT,
-    cloud_trail_compliant = ServiceState.COMPLIANT,
-    asg_sec_group_compliant = ServiceState.COMPLIANT,
-    ec2_instance_2a_compliant = ServiceState.COMPLIANT,
-    ec2_instance_2b_compliant = ServiceState.COMPLIANT,
-    rds_db_compliant = ServiceState.COMPLIANT,
-    rds_sec_group_compliant = ServiceState.COMPLIANT,
-    s3_bucket_compliant = ServiceState.COMPLIANT,
+global_compliance_state: types.ComplianceState = types.ComplianceState(
+    alb_sec_group_compliant = types.ServiceState(),
+    cloud_trail_compliant = types.ServiceState(),
+    asg_sec_group_compliant = types.ServiceState(),
+    ec2_instance_2a_compliant = types.ServiceState(),
+    ec2_instance_2b_compliant = types.ServiceState(),
+    rds_db_compliant = types.ServiceState(),
+    rds_sec_group_compliant = types.ServiceState(),
+    s3_bucket_compliant = types.ServiceState()
 )
 
 def create_signal_handler(mqtt_client: mqtt_interface.MqttClientInterface):
@@ -77,7 +46,7 @@ button_client: button_interface.ButtonInterface = button_interface.ButtonInterfa
     constants.BUTTON_PORT, 
     on_button_clicked_callback)
 
-mqtt_client_options: mqtt_interface.MqttClientOptionType = mqtt_interface.MqttClientOptionType(
+mqtt_client_options: types.MqttClientOption = types.MqttClientOption(
     endpoint=constants.MQTT_CLIENT_ENDPOINT,
     port=constants.MQTT_CLIENT_PORT,
     cert_filepath=constants.MQTT_CLIENT_CERT_FILEPATH,
@@ -99,13 +68,23 @@ neopixel_client : neopixel_interface.NeopixelInterface = neopixel_interface.Neop
 # TODO: Set up all of the connections and components
 test_architecture_component: architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
-    component_connections=[5, 6],
-    ingoing_connections=[1, 2, 3, 4],
-    outgoing_connections=[7, 8, 9, 10]
+    component_connections=[types.ConnectionComponent("alb_sec_group_compliant", [5, 6])],
+    #component_connections=[],
+    ingoing_connections=[types.ConnectionComponent("cloud_trail_compliant", [0, 1, 2, 3, 4])],
+    outgoing_connections=[types.ConnectionComponent("rds_sec_group_compliant", [7, 8, 9, 10])]
+    #outgoing_connections=[]
 )
 
+test_architecture_component2: architecture.ArchitectureComponent = architecture.ArchitectureComponent(
+    neopixel_client = neopixel_client,
+    component_connections=[types.ConnectionComponent("alb_sec_group_compliant", [24, 25])],
+    #component_connections=[],
+    ingoing_connections=[types.ConnectionComponent("cloud_trail_compliant", [17, 18, 19, 20, 21, 22, 23])],
+    outgoing_connections=[types.ConnectionComponent("rds_sec_group_compliant", [26, 27, 28, 29, 30])]
+    #outgoing_connections=[]
+)
 
 while True:
     test_architecture_component.update(global_compliance_state)
+    #test_architecture_component2.update(global_compliance_state)
     neopixel_client.show_changes()
-    time.sleep("10")
