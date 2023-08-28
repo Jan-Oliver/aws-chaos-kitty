@@ -3,13 +3,18 @@ from dataclasses import dataclass
 import signal
 import sys
 import os
+import time 
+
+from typing import List
 from uuid import uuid4
 from enum import Enum
 import RPi.GPIO as GPIO
 
 import src.interfaces.button as button_interface
 import src.interfaces.mqtt as mqtt_interface
+import src.interfaces.neopixel as neopixel_interface
 import src.utils.constants as constants
+import src.architecture.component as architecture
 
 
 class ServiceState(Enum):
@@ -35,9 +40,7 @@ class ComplianceState:
     rds_sec_group_compliant: ServiceState
     # Non-Compliant: S3 Bucket public
     s3_bucket_compliant: ServiceState
-
     _instance = None
-
     def __new__(cls, *args, **kwargs):
         if not isinstance(cls._instance, cls):
             cls._instance = super(ComplianceState, cls).__new__(cls)
@@ -64,6 +67,7 @@ def create_signal_handler(mqtt_client: mqtt_interface.MqttClientInterface):
     return signal_handler
 
 def on_button_clicked_callback():
+    # TODO: Add timeout after button pressed - only allow every 30 seconds
     print("Pressed button")
     mqtt_client.publish_message(
         constants.MQTT_CLIENT_PUBLISHING_TOPIC,
@@ -88,8 +92,20 @@ mqtt_client: mqtt_interface.MqttClientInterface = mqtt_interface.MqttClientInter
 signal.signal(signal.SIGINT, create_signal_handler(mqtt_client))
 signal.pause()
 
-# TODO: Main loop -> 
-while True:
-    # TODO: Take the current state and update all of the architecture components
-    pass
+neopixel_client : neopixel_interface.NeopixelInterface = neopixel_interface.NeopixelInterface(
+    port=constants.NEOPIXEL_PORT,
+    nb_pixels=constants.NEOPIXEL_NB_PIXELS)
 
+# TODO: Set up all of the connections and components
+test_architecture_component: architecture.ArchitectureComponent = architecture.ArchitectureComponent(
+    neopixel_client = neopixel_client,
+    component_connections=[5, 6],
+    ingoing_connections=[1, 2, 3, 4],
+    outgoing_connections=[7, 8, 9, 10]
+)
+
+
+while True:
+    test_architecture_component.update(global_compliance_state)
+    neopixel_client.show_changes()
+    time.sleep("10")

@@ -3,8 +3,7 @@ import board
 import neopixel
 from enum import Enum
 
-from utils.constants import ServiceConnectionState
-from utils.constants import ServiceState
+from src.main import ServiceState
 
 class IntensityWheelValues(Enum):
     ON: 250
@@ -33,13 +32,20 @@ class NeopixelInterface():
         # For RGBW NeoPixels, simply change the ORDER to RGBW or GRBW.
         self.neopixel_client: neopixel.NeoPixel = neopixel.NeoPixel(port, nb_pixels, brightness=0.2, auto_write=False, pixel_order=neopixel.RGB)
 
-    def update_service_connection_pixels(self, pixels: list[int], state: ServiceConnectionState):
-        # TODO: Set up blinking depending on state for specific pixels
-        pass
+    def update_connection_pixels(self, pixels: list[int], compliance_state: ServiceState):
+        base_color = (255, 255, 255) if compliance_state == ServiceState.COMPLIANT else (255, 0, 0)  # white for compliant, red for non-compliant
+        intensity_values = [intensity.value for intensity in IntensityWheelValues]
+        
+        for idx, pixel in enumerate(pixels):
+            # Create a moving effect using the intensity wheel and time
+            intensity_factor = intensity_values[int((idx + time.time() * 2) % len(intensity_values))] / 255.0  # multipled time with 2 to speed up movement
+            adjusted_color = tuple(int(value * intensity_factor) for value in base_color)
+            self.neopixel_client[pixel] = adjusted_color
 
-    def update_service_pixels(self, pixels: list[int], state: ServiceState):
-        # TODO: Set up visual depending on state for specific pixels
-        pass
+    def update_component_pixels(self, pixels: list[int], compliance_state: ServiceState):
+        color = (255, 255, 255) if compliance_state == ServiceState.COMPLIANT else (255, 0, 0)  # white for compliant, red for non-compliant
+        for pixel in pixels:
+            self.neopixel_client[pixel] = color
 
     def show_changes(self):
         """ Move changes to the actual hardware """
