@@ -39,3 +39,7 @@ class NeopixelInterface():
     def show_changes(self):
         """ Move changes to the actual hardware """
         self.neopixel_client.show()
+
+    def cleanup(self):
+        """ Celan up """
+        self.neopixel_client.deinit()

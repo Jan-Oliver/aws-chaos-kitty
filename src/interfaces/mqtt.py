@@ -31,9 +31,8 @@ class MqttClientInterface():
         self.client: mqtt5.Client = mqtt5_client_builder.mtls_from_path(
             endpoint=client_options.endpoint,
             port=client_options.port,
-            cert_filepath=client_options.cert_filepath,
-            pri_key_filepath=client_options.ca_filepath,
-            ca_filepath=client_options.ca_filepath,
+            cert_filepath=str(client_options.cert_filepath),
+            pri_key_filepath=str(client_options.pri_key_filepath),
             client_id=client_options.client_id,
             on_publish_received=self._on_publish_received,
             on_lifecycle_stopped=self._on_lifecycle_stopped,

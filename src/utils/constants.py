@@ -13,10 +13,10 @@ NEOPIXEL_PORT = board.D18
 NEOPIXEL_NB_PIXELS = 100
 
 # Mqtt client config
-MQTT_CLIENT_ENDPOINT = "a2f97hrgv6egz9-ats.iot.eu-central-1.amazonaws.com",
-MQTT_CLIENT_PORT = 8883,
-MQTT_CLIENT_CERT_FILEPATH = os.path.join(CERTIFICATES_PATH, "4cd4ee53ab6b0dff22c32f9acaa08221ad1dd4d58dbb34ba889b6a7f77b2b6d0-certificate.pem.crt"),
-MQTT_CLIENT_PRI_KEY_FILEPATH = os.path.join(CERTIFICATES_PATH, "4cd4ee53ab6b0dff22c32f9acaa08221ad1dd4d58dbb34ba889b6a7f77b2b6d0-private.pem.key"),
+MQTT_CLIENT_ENDPOINT = "a2f97hrgv6egz9-ats.iot.eu-central-1.amazonaws.com"
+MQTT_CLIENT_PORT = 8883
+MQTT_CLIENT_CERT_FILEPATH = os.path.join(CERTIFICATES_PATH, "4cd4ee53ab6b0dff22c32f9acaa08221ad1dd4d58dbb34ba889b6a7f77b2b6d0-certificate.pem.crt")
+MQTT_CLIENT_PRI_KEY_FILEPATH = os.path.join(CERTIFICATES_PATH, "4cd4ee53ab6b0dff22c32f9acaa08221ad1dd4d58dbb34ba889b6a7f77b2b6d0-private.pem.key")
 MQTT_CLIENT_CLIENT_ID = f"Raspi4"
 
 # Mqtt publish topic

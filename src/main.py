@@ -16,21 +16,24 @@ import src.architecture.component as architecture
 import src.utils.types as types
 
 global_compliance_state: types.ComplianceState = types.ComplianceState(
-    alb_sec_group_compliant = types.ServiceState(),
+    alb_sec_group_compliant = types.ServiceState(False),
     cloud_trail_compliant = types.ServiceState(),
     asg_sec_group_compliant = types.ServiceState(),
     ec2_instance_2a_compliant = types.ServiceState(),
     ec2_instance_2b_compliant = types.ServiceState(),
     rds_db_compliant = types.ServiceState(),
     rds_sec_group_compliant = types.ServiceState(),
-    s3_bucket_compliant = types.ServiceState()
+    s3_bucket_compliant = types.ServiceState(False)
 )
 
-def create_signal_handler(mqtt_client: mqtt_interface.MqttClientInterface):
+def create_signal_handler(
+        mqtt_client: mqtt_interface.MqttClientInterface, 
+        neopixel_client : neopixel_interface.NeopixelInterface):
     """ Wrapper to provide signal_handler with references to objects needed to be shut down. """
     def signal_handler(sig, frame):
         """ Called when Ctl + C is pressed """
         mqtt_client.cleanup()
+        neopixel_client.cleanup()
         GPIO.cleanup()
         sys.exit(0)
     return signal_handler
@@ -58,9 +61,6 @@ mqtt_client: mqtt_interface.MqttClientInterface = mqtt_interface.MqttClientInter
     mqtt_client_options,
     constants.MQTT_CLIENT_SUBSCRIPTION_TOPIC)
 
-signal.signal(signal.SIGINT, create_signal_handler(mqtt_client))
-signal.pause()
-
 neopixel_client : neopixel_interface.NeopixelInterface = neopixel_interface.NeopixelInterface(
     port=constants.NEOPIXEL_PORT,
     nb_pixels=constants.NEOPIXEL_NB_PIXELS)
@@ -83,6 +83,8 @@ test_architecture_component2: architecture.ArchitectureComponent = architecture.
     outgoing_connections=[types.ConnectionComponent("rds_sec_group_compliant", [26, 27, 28, 29, 30])]
     #outgoing_connections=[]
 )
+
+signal.signal(signal.SIGINT, create_signal_handler(mqtt_client, neopixel_client))
 
 while True:
     test_architecture_component.update(global_compliance_state)
