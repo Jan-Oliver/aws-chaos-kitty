@@ -10,6 +10,7 @@ BUTTON_PORT = 16
 
 # Port for Neopixel LED stripe
 NEOPIXEL_PORT = board.D18
+# Number of LED pixels used for Neopixel stripe
 NEOPIXEL_NB_PIXELS = 100
 
 # Mqtt client config
