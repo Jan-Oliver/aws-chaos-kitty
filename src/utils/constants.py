@@ -20,11 +20,11 @@ MQTT_CLIENT_PRI_KEY_FILEPATH = os.path.join(CERTIFICATES_PATH, "4cd4ee53ab6b0dff
 MQTT_CLIENT_CLIENT_ID = f"Raspi4"
 
 # Mqtt publish topic
-MQTT_CLIENT_PUBLISHING_TOPIC = "TODO"
+MQTT_CLIENT_PUBLISHING_TOPIC = "test/topic"
 MQTT_CLIENT_PUBLISHING_MESSAGE = ""
 
 # Mqtt subscription topic
-MQTT_CLIENT_SUBSCRIPTION_TOPIC = "aws/bulb/"
+MQTT_CLIENT_SUBSCRIPTION_TOPIC = "aws/bulb/31"
 MQTT_CLIENT_SUBSCRIPTION_PAYLOAD_COMPLIANT = 'green'
 
 # Mapping of ID of iot core messaging to aws architecture

@@ -81,12 +81,21 @@ class MqttClientInterface():
         architecture_component_id = int(publish_packet.topic.split('/')[-1])
         acrchitecture_component_name = constants.MQTT_ID_TO_STATE_MAPPING.get(architecture_component_id)
 
+        decoded_payload = ""
+        if publish_packet and publish_packet.payload:
+            decoded_payload = publish_packet.payload.decode("utf-8")
+            print("Payload", decoded_payload)
+        else:
+            print("No payload attached. Stop processing received message")
+            return
+
         is_architecture_component_compliant = False
-        if publish_packet.payload == constants.MQTT_CLIENT_SUBSCRIPTION_PAYLOAD_COMPLIANT:
+        if decoded_payload == constants.MQTT_CLIENT_SUBSCRIPTION_PAYLOAD_COMPLIANT:
             is_architecture_component_compliant = True
 
         if acrchitecture_component_name:
-            setattr(self.global_compliance_state, acrchitecture_component_name, is_architecture_component_compliant)
+            print(f"Architecture component {acrchitecture_component_name} is compliant: {is_architecture_component_compliant}")
+            setattr(self.global_compliance_state, acrchitecture_component_name, types.ServiceState(COMPLIANT=is_architecture_component_compliant))
 
 
     # Callback for the lifecycle event Stopped

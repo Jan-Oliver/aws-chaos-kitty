@@ -16,13 +16,13 @@ import src.architecture.component as architecture
 import src.utils.types as types
 
 global_compliance_state: types.ComplianceState = types.ComplianceState(
-    alb_sec_group_compliant = types.ServiceState(False),
+    alb_sec_group_compliant = types.ServiceState(),
     cloud_trail_compliant = types.ServiceState(),
     asg_sec_group_compliant = types.ServiceState(),
     ec2_instance_2a_compliant = types.ServiceState(),
     ec2_instance_2b_compliant = types.ServiceState(),
     rds_db_compliant = types.ServiceState(),
-    rds_sec_group_compliant = types.ServiceState(),
+    rds_sec_group_compliant = types.ServiceState(False),
     s3_bucket_compliant = types.ServiceState(False)
 )
 
@@ -68,25 +68,31 @@ neopixel_client : neopixel_interface.NeopixelInterface = neopixel_interface.Neop
 # TODO: Set up all of the connections and components
 test_architecture_component: architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
-    component_connections=[types.ConnectionComponent("alb_sec_group_compliant", [5, 6])],
+    component_connections=[types.ConnectionComponent("rds_db_compliant", [5, 6])],
     #component_connections=[],
-    ingoing_connections=[types.ConnectionComponent("cloud_trail_compliant", [0, 1, 2, 3, 4])],
+    ingoing_connections=[types.ConnectionComponent("alb_sec_group_compliant", [0, 1, 2, 3, 4])],
     outgoing_connections=[types.ConnectionComponent("rds_sec_group_compliant", [7, 8, 9, 10])]
     #outgoing_connections=[]
 )
 
 test_architecture_component2: architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
-    component_connections=[types.ConnectionComponent("alb_sec_group_compliant", [24, 25])],
+    component_connections=[types.ConnectionComponent("s3_bucket_compliant", [24, 25])],
     #component_connections=[],
     ingoing_connections=[types.ConnectionComponent("cloud_trail_compliant", [17, 18, 19, 20, 21, 22, 23])],
-    outgoing_connections=[types.ConnectionComponent("rds_sec_group_compliant", [26, 27, 28, 29, 30])]
+    outgoing_connections=[types.ConnectionComponent("asg_sec_group_compliant", [26, 27, 28, 29, 30])]
     #outgoing_connections=[]
 )
+
+architecture_components: List[architecture.ArchitectureComponent] = [
+    test_architecture_component,
+    test_architecture_component2
+]
 
 signal.signal(signal.SIGINT, create_signal_handler(mqtt_client, neopixel_client))
 
 while True:
-    test_architecture_component.update(global_compliance_state)
-    #test_architecture_component2.update(global_compliance_state)
+    for architecture_component in architecture_components:
+        architecture_component.update(global_compliance_state)
+
     neopixel_client.show_changes()
