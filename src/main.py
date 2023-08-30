@@ -38,13 +38,23 @@ def create_signal_handler(
         sys.exit(0)
     return signal_handler
 
+last_click_timestamp = 0  # initializing the timestamp at the start
 def on_button_clicked_callback():
-    # TODO: Add timeout after button pressed - only allow every 30 seconds
+    global last_click_timestamp
+
+    current_time = time.time()
     
-    print("Pressed button")
-    mqtt_client.publish_message(
-        constants.MQTT_CLIENT_PUBLISHING_TOPIC,
-        constants.MQTT_CLIENT_PUBLISHING_MESSAGE)
+    # Check if the difference between the current time and the last click timestamp is more than 10 seconds
+    if current_time - last_click_timestamp >= 10:
+        print("Pressed button")
+        mqtt_client.publish_message(
+            constants.MQTT_CLIENT_PUBLISHING_TOPIC,
+            constants.MQTT_CLIENT_PUBLISHING_MESSAGE)
+        
+        # Update the timestamp
+        last_click_timestamp = current_time
+    else:
+        print("Button pressed too quickly. Please wait for 10 seconds between presses.")
 
 button_client: button_interface.ButtonInterface = button_interface.ButtonInterface(
     constants.BUTTON_PORT, 
