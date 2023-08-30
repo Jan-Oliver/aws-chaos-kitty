@@ -103,7 +103,6 @@ class MqttClientInterface():
         print("Lifecycle Stopped")
         self.future_stopped.set_result(lifecycle_stopped_data)
 
-
     def cleanup(self):
         """ Remove subscription and stop the client """
         print(f"Unsubscribing from topic {self.subscription_topic}")

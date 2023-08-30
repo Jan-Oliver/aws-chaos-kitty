@@ -40,6 +40,7 @@ def create_signal_handler(
 
 def on_button_clicked_callback():
     # TODO: Add timeout after button pressed - only allow every 30 seconds
+    
     print("Pressed button")
     mqtt_client.publish_message(
         constants.MQTT_CLIENT_PUBLISHING_TOPIC,

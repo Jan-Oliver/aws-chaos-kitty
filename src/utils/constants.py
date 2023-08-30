@@ -23,8 +23,8 @@ MQTT_CLIENT_CLIENT_ID = f"Raspi4"
 MQTT_CLIENT_PUBLISHING_TOPIC = "test/topic"
 MQTT_CLIENT_PUBLISHING_MESSAGE = ""
 
-# Mqtt subscription topic
-MQTT_CLIENT_SUBSCRIPTION_TOPIC = "aws/bulb/31"
+# Mqtt subscription topic, + is a level 1 wildcard in mqtt
+MQTT_CLIENT_SUBSCRIPTION_TOPIC = "aws/bulb/+"
 MQTT_CLIENT_SUBSCRIPTION_PAYLOAD_COMPLIANT = 'green'
 
 # Mapping of ID of iot core messaging to aws architecture

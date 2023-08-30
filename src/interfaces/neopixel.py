@@ -21,7 +21,7 @@ class NeopixelInterface():
         self.neopixel_client: neopixel.NeoPixel = neopixel.NeoPixel(port, nb_pixels, brightness=0.2, auto_write=False, pixel_order=neopixel.RGB)
 
     def update_connection_pixels(self, pixels: list[int], compliance_state: types.ServiceState):
-        base_color = (255, 255, 255) if compliance_state.COMPLIANT else (0, 255, 0)  # white for compliant, red for non-compliant
+        base_color = (255, 255, 255) if compliance_state.COMPLIANT else (100, 255, 0)  # white for compliant, red for non-compliant
         intensity_values = [intensity.value for intensity in IntensityWheelValues]
 
         for idx, pixel in enumerate(pixels):
