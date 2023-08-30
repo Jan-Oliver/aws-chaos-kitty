@@ -70,7 +70,7 @@ To test the setup:
 
 2. Run the main script:
     ```bash
-    python3 -m src.main
+    sudo python3 -m src.main
     ```
 
 3. Test the integration by sending messages via the AWS IoT Core Test Broker on the topic `aws/bulb/<id>`, where `<id>` is between 31 and 38.
