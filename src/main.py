@@ -39,7 +39,7 @@ def create_signal_handler(
     return signal_handler
 
 last_click_timestamp = 0  # initializing the timestamp at the start
-def on_button_clicked_callback():
+def on_button_clicked_callback(value):
     global last_click_timestamp
 
     current_time = time.time()
