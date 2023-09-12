@@ -11,7 +11,7 @@ BUTTON_PORT = 16
 # Port for Neopixel LED stripe
 NEOPIXEL_PORT = board.D18
 # Number of LED pixels used for Neopixel stripe
-NEOPIXEL_NB_PIXELS = 100
+NEOPIXEL_NB_PIXELS = 200
 
 # Mqtt client config
 MQTT_CLIENT_ENDPOINT = "a2f97hrgv6egz9-ats.iot.eu-central-1.amazonaws.com"
@@ -21,7 +21,7 @@ MQTT_CLIENT_PRI_KEY_FILEPATH = os.path.join(CERTIFICATES_PATH, "4cd4ee53ab6b0dff
 MQTT_CLIENT_CLIENT_ID = f"Raspi4"
 
 # Mqtt publish topic
-MQTT_CLIENT_PUBLISHING_TOPIC = "test/topic"
+MQTT_CLIENT_PUBLISHING_TOPIC = "startChaosKitty/easy"
 MQTT_CLIENT_PUBLISHING_MESSAGE = ""
 
 # Mqtt subscription topic, + is a level 1 wildcard in mqtt
@@ -30,12 +30,12 @@ MQTT_CLIENT_SUBSCRIPTION_PAYLOAD_COMPLIANT = 'green'
 
 # Mapping of ID of iot core messaging to aws architecture
 MQTT_ID_TO_STATE_MAPPING = {
-    31: "alb_sec_group_compliant",
-    32: "cloud_trail_compliant",
-    33: "asg_sec_group_compliant",
-    34: "ec2_instance_2a_compliant",
-    35: "ec2_instance_2b_compliant",
-    36: "rds_db_compliant",
-    37: "rds_sec_group_compliant",
-    38: "s3_bucket_compliant",
+    31: "alb_sec_group_compliant",      # Opens the security group for all incoming traffic. Port 22
+    32: "cloud_trail_compliant",        # Turn off Cloud Trail 
+    33: "asg_sec_group_compliant",      # Opens the security group for all incoming traffic. Port 22
+    34: "ec2_instance_2a_compliant",    # Changes role to give S3 Full Access (Called "S3 Unsafe Role")
+    35: "ec2_instance_2b_compliant",    # Changes role to give S3 Full Access (Called "S3 Unsafe Role")
+    36: "rds_db_compliant",             # Adapt the authentication such that IAM authentication is no longer working...
+    37: "rds_sec_group_compliant",      # Opens the security group for all incoming traffic. Port 3306
+    38: "s3_bucket_compliant",          # Turns of public access block
 }

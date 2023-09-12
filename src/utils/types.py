@@ -11,22 +11,32 @@ class ServiceState:
 @dataclass
 class ComplianceState:
     """ Defines compliance state globally - Singleton """
+    # Not yet part of experiment
+    igw_compliant: ServiceState
     # Non-Compliant: Open Application Load Balancer Security Group
     alb_sec_group_compliant: ServiceState
+    # Not yet part of experiment
+    alb_compliant: ServiceState
     # Non-Compliant: Cloud Trail Turned off
     cloud_trail_compliant: ServiceState
     # Non-Compliant: Open Auto Scaling Group Security Group
     asg_sec_group_compliant: ServiceState
     # Non-Compliant: Unsafe Role for EC2 Instance in AZ A
     ec2_instance_2a_compliant: ServiceState
+    # Not yet part of experiment
+    ec2_instance_2a_sec_group: ServiceState
     # Non-Compliant: Unsafe Role for EC2 Instance in AZ B
     ec2_instance_2b_compliant: ServiceState
+    # Not yet part of experiment
+    ec2_instance_2b_sec_group: ServiceState
     # Non-Compliant: Change Relational Database System Authentication
     rds_db_compliant: ServiceState
     # Non-Compliant: Open Relational Database System Security Group
     rds_sec_group_compliant: ServiceState
     # Non-Compliant: S3 Bucket public
     s3_bucket_compliant: ServiceState
+    # Helper connection that is not used for any specific state
+    general_connection: ServiceState
 
     _instance = None
     

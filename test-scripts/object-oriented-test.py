@@ -1,38 +1,61 @@
 from enum import Enum
 import time
 import neopixel
-import types  # Make sure to import this if you use types.ServiceState
+import board
 
-class ColorWheelValues(Enum):
-    ON = (255, 255, 255)  # white
-    BRIGHT = (250, 250, 250)
-    MEDIUM = (128, 128, 128)
-    LOW = (70, 70, 70)
-    OFF = (10, 10, 10)
-    OFF2 = (0, 0, 0)  # black
+from enum import Enum
+from dataclasses import dataclass
+from typing import List
 
+
+@dataclass
+class ServiceState:
+    COMPLIANT: bool = True
+
+class IntensityWheelValues(Enum):
+    ON = 250
+    BRIGHT = 70
+    MEDIUM = 25
+    LOW = 2
+    OFF = 1
+    OFF2 = 0
+    
 class NeopixelInterface():
     def __init__(self, port: int, nb_pixels: int):
         self.port = port
         self.nb_pixels = nb_pixels
-        self.neopixel_client: neopixel.NeoPixel = neopixel.NeoPixel(
-            port, nb_pixels, brightness=0.2, auto_write=False, pixel_order=neopixel.RGB)
-        
-        self.color_wheel_values = [color.value for color in ColorWheelValues]
+        # The order of the pixel colors - RGB or GRB. Some NeoPixels have red and green reversed!
+        # For RGBW NeoPixels, simply change the ORDER to RGBW or GRBW.
+        self.neopixel_client: neopixel.NeoPixel = neopixel.NeoPixel(port, nb_pixels, brightness=0.2, auto_write=False, pixel_order=neopixel.RGB)
+        self.int_values = [intensity.value for intensity in IntensityWheelValues]
+        self.len_int_values = len(self.int_values)
 
-    def update_connection_pixels(self, pixels: list[int], compliance_state: types.ServiceState):
-        base_color = (255, 255, 255) if compliance_state.COMPLIANT else (100, 255, 0)
 
+    def update_connection_pixels(self, pixels: list[int], compliance_state: ServiceState):
+        base_color = (255, 255, 255) if compliance_state.COMPLIANT else (100, 255, 0)  # white for compliant, red for non-compliant
+        c_time = time.time()
         for idx, pixel in enumerate(pixels):
-            # Use the color wheel to determine pixel color
-            color_index = int((time.time() * 2 - idx) % len(self.color_wheel_values))
-            self.neopixel_client[pixel] = self.multiply_colors(base_color, self.color_wheel_values[color_index])
+            # Create a moving effect using the intensity wheel and time
+            # Add idx to make it "move" in the other direction
+            intensity_factor = self.int_values[int((c_time * 100 - idx) % self.len_int_values)] / 255.0  # multipled time with 2 to speed up movement
+            adjusted_color = tuple(int(value * intensity_factor) for value in base_color)
+            self.neopixel_client[pixel] = adjusted_color
+        
+        self.neopixel_client.show()
+        
+    def show_changes(self):
+        self.neopixel_client.show()
 
-    def multiply_colors(self, color1: tuple, color2: tuple) -> tuple:
-        return tuple(int(a * b / 255) for a, b in zip(color1, color2))
+# Port for Neopixel LED stripe
+NEOPIXEL_PORT = board.D18
+# Number of LED pixels used for Neopixel stripe
+NEOPIXEL_NB_PIXELS = 10
 
 # Usage
-interface = NeopixelInterface(port=0, nb_pixels=10)
+interface = NeopixelInterface(port=NEOPIXEL_PORT, nb_pixels=NEOPIXEL_NB_PIXELS)
 pixels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-state = types.ServiceState.COMPLIANT  # or whatever your real state value is
-interface.update_connection_pixels(pixels, state)
+state = ServiceState(COMPLIANT=False)  # or whatever your real state value is
+for i in range(100):
+    interface.update_connection_pixels(pixels, state)
+    time.sleep(0.01)
+

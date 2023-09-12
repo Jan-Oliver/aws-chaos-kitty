@@ -16,14 +16,19 @@ import src.architecture.component as architecture
 import src.utils.types as types
 
 global_compliance_state: types.ComplianceState = types.ComplianceState(
+    igw_compliant = types.ServiceState(), # Not yet part of experiment
     alb_sec_group_compliant = types.ServiceState(),
+    alb_compliant = types.ServiceState(True), # Not yet part of experiment
     cloud_trail_compliant = types.ServiceState(),
     asg_sec_group_compliant = types.ServiceState(),
     ec2_instance_2a_compliant = types.ServiceState(),
+    ec2_instance_2a_sec_group = types.ServiceState(True), # Not yet part of experiment
     ec2_instance_2b_compliant = types.ServiceState(),
+    ec2_instance_2b_sec_group = types.ServiceState(True), # Not yet part of experiment
     rds_db_compliant = types.ServiceState(),
-    rds_sec_group_compliant = types.ServiceState(False),
-    s3_bucket_compliant = types.ServiceState(False)
+    rds_sec_group_compliant = types.ServiceState(),
+    s3_bucket_compliant = types.ServiceState(),
+    general_connection = types.ServiceState()
 )
 
 def create_signal_handler(
@@ -76,36 +81,108 @@ neopixel_client : neopixel_interface.NeopixelInterface = neopixel_interface.Neop
     port=constants.NEOPIXEL_PORT,
     nb_pixels=constants.NEOPIXEL_NB_PIXELS)
 
+"""
+A: 1, 2, 3, 100, 99, 98
+B: 4-15 (RDS AZ1 <-> RDS AZ2)
+C: 16, 17, 18, 19, 20, 112, 110
+D: 35-21 (EC2 AZ1 -> RDS AZ2)
+E: 36-39, 106 (EC2 AZ1)
+F: 50-40 (ALB -> EC2 AZ1)
+G: 51, 52, 53, 54, 69 (ALB)
+H: 55, 54 (IGW -> ALB)
+I: 56, 57, 58, 59 (IGW)
+J: 60, 61, 62, 63 (Cloud Trail)
+K: 64, 65, 66, 67 (S3)
+L: 70-78 (ALB -> EC2 AZ2)
+M: 79-84 (EC2 AZ2)
+N: 85-97 (EC2 AZ2 -> RDS AZ1)
+O: 105-101 (EC2 AZ1 -> RDS AZ1)
+P: 107-110 (EC2 AZ2 -> RDS AZ2)
+"""
 # TODO: Set up all of the connections and components
-
-# It is possible to have not outgoing/ingoing/component connections by specifing an empty list
-example_architecture_component: architecture.ArchitectureComponent = architecture.ArchitectureComponent(
+s3_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
-    component_connections=[types.ConnectionComponent("rds_db_compliant", [5, 6])],
-    ingoing_connections=[types.ConnectionComponent("alb_sec_group_compliant", [0, 1, 2, 3, 4])],
-    outgoing_connections=[]
+    component_connections=[types.ConnectionComponent("s3_bucket_compliant", [64, 65, 66, 67])],
+    ingoing_connections=[],
+    outgoing_connections=[],
 )
 
-# It is possible to have multiple outgoing/ingoing/component connections by specifing multiple ConnectionComponents in the list
-example2_architecture_component2: architecture.ArchitectureComponent = architecture.ArchitectureComponent(
+cloudtrail_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
-    component_connections=[types.ConnectionComponent("s3_bucket_compliant", [24, 25])],
-    ingoing_connections=[types.ConnectionComponent("cloud_trail_compliant", [17, 18, 19, 20, 21, 22, 23])],
-    outgoing_connections=[
-        types.ConnectionComponent("asg_sec_group_compliant", [26, 27, 28, 29, 30]),
-        types.ConnectionComponent("rds_sec_group_compliant", [7, 8, 9, 10])
-        ]
+    component_connections=[types.ConnectionComponent("cloud_trail_compliant", [60, 61, 62, 63])],
+    ingoing_connections=[],
+    outgoing_connections=[],
 )
 
+igw_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
+    neopixel_client = neopixel_client,
+    component_connections=[types.ConnectionComponent("igw_compliant", [56, 57, 58, 59])],
+    ingoing_connections=[],
+    outgoing_connections=[types.ConnectionComponent("general_connection", [55])],
+)
+
+alb_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
+    neopixel_client = neopixel_client,
+    component_connections=[types.ConnectionComponent("alb_compliant", [50, 51, 52, 53, 68])],
+    ingoing_connections=[types.ConnectionComponent("alb_sec_group_compliant", [54])],
+    outgoing_connections=[types.ConnectionComponent("general_connection", [49, 48, 47, 46, 45, 44, 43, 42, 41, 40]), # (ALB -> EC2 AZ1)
+                          types.ConnectionComponent("general_connection", [69, 70, 71, 72, 73, 74, 75, 76, 77, 78 ])] # (ALB -> EC2 AZ2)
+)
+
+ec2_az1_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
+    neopixel_client = neopixel_client,
+    component_connections=[types.ConnectionComponent("ec2_instance_2a_compliant", [36, 37, 38, 39, 105, 106])],
+    ingoing_connections=[types.ConnectionComponent("ec2_instance_2a_sec_group", [40])],
+    outgoing_connections=[types.ConnectionComponent("general_connection", [104, 103, 102]), # (EC2 AZ1 -> RDS AZ1)
+                          types.ConnectionComponent("general_connection", [35, 34, 33, 32, 31, 30, 29, 28, 27,26, 25, 24, 23, 22])] # (EC2 AZ1 -> RDS AZ2)
+)
+
+ec2_az2_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
+    neopixel_client = neopixel_client,
+    component_connections=[types.ConnectionComponent("ec2_instance_2b_compliant", [79, 80, 81, 82, 83])],
+    ingoing_connections=[types.ConnectionComponent("ec2_instance_2b_sec_group", [78])],
+    outgoing_connections=[types.ConnectionComponent("general_connection", [107, 108, 109]), # (EC2 AZ2 -> RDS AZ2)
+                          types.ConnectionComponent("general_connection", [85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96])] # (EC2 AZ2 -> RDS AZ1)
+)
+
+rds_az1_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
+    neopixel_client = neopixel_client,
+    component_connections=[types.ConnectionComponent("rds_db_compliant", [1, 2, 3, 100, 99, 98])],
+    ingoing_connections=[types.ConnectionComponent("rds_sec_group_compliant", [101]),
+                         types.ConnectionComponent("rds_sec_group_compliant", [97]),
+                         # types.ConnectionComponent("rds_sec_group_compliant", [4]) - Connection between RDS
+                         ],       
+    outgoing_connections=[types.ConnectionComponent("general_connection", [4, 5, 6, 7, 8, 9, 10])]
+)
+
+rds_az2_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
+    neopixel_client = neopixel_client,
+    component_connections=[types.ConnectionComponent("rds_db_compliant", [16, 17, 18, 19, 20, 112, 111])],
+    ingoing_connections=[types.ConnectionComponent("rds_sec_group_compliant", [110]),
+                         types.ConnectionComponent("rds_sec_group_compliant", [21]),
+                         # types.ConnectionComponent("rds_sec_group_compliant", [15]) - Connection between RDS
+                         ],
+    outgoing_connections=[types.ConnectionComponent("general_connection", [15, 14, 13, 12, 11, 10])]
+)
+
+
+
+#
 architecture_components: List[architecture.ArchitectureComponent] = [
-    example_architecture_component,
-    example2_architecture_component2
+    s3_component,
+    cloudtrail_component,
+    igw_component,
+    alb_component,
+    rds_az1_component,
+    rds_az2_component,
+    ec2_az1_component,
+    ec2_az2_component
 ]
+
 
 signal.signal(signal.SIGINT, create_signal_handler(mqtt_client, neopixel_client))
 
 while True:
     for architecture_component in architecture_components:
         architecture_component.update(global_compliance_state)
-
     neopixel_client.show_changes()
