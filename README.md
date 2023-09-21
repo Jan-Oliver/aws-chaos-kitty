@@ -164,3 +164,8 @@ To tailor the system to your specific AWS setup:
 ### 3. **Configuring AWS Interactions**
 
 Remember to keep the AWS IoT Core setup and Raspberry Pi in sync. If you modify the topics or payloads in the Raspberry Pi, ensure corresponding changes are made in AWS IoT Core's rules and actions.
+
+
+
+sudo crontab -e
+@reboot bash /home/schnidrc/aws-chaos-kitty/startup.sh > /home/schnidrc/aws-chaos-kitty/logs/cronlog 2>&1

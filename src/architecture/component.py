@@ -26,7 +26,7 @@ class ArchitectureComponent():
             state_id = ingoing_connection.state_id
             pixels = ingoing_connection.pixels
             compliance_state = getattr(global_compliance_state, state_id)
-            self.neopixel_client.update_sec_group_pixels(pixels, compliance_state)
+            self.neopixel_client.update_ingoing_pixels(pixels, compliance_state)
 
     def _update_outgoing_connections(self, global_compliance_state: types.ComplianceState):
         if not self.outgoing_connections:
@@ -36,7 +36,7 @@ class ArchitectureComponent():
             state_id = outgoing_connection.state_id
             pixels = outgoing_connection.pixels
             compliance_state = getattr(global_compliance_state, state_id)
-            self.neopixel_client.update_connection_pixels(pixels, compliance_state)
+            self.neopixel_client.update_outgoing_pixels(pixels, compliance_state)
 
     def _update_component_connections(self, global_compliance_state: types.ComplianceState):
         if not self.component_connections:

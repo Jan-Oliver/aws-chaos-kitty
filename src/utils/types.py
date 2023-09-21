@@ -33,6 +33,8 @@ class ComplianceState:
     rds_db_compliant: ServiceState
     # Non-Compliant: Open Relational Database System Security Group
     rds_sec_group_compliant: ServiceState
+    # Not yet part of experiment
+    rds_replication_compliant: ServiceState
     # Non-Compliant: S3 Bucket public
     s3_bucket_compliant: ServiceState
     # Helper connection that is not used for any specific state

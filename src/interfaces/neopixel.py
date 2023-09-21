@@ -43,7 +43,12 @@ class NeopixelInterface():
         self.current_intensity = int(self.amplitude * math.sin(2 * math.pi * self.current_cycle_step / self.cycle_length) + self.offset)
 
 
-    def update_connection_pixels(self, pixels: list[int], compliance_state: types.ServiceState):
+    def update_outgoing_pixels(self, pixels: list[int], compliance_state: types.ServiceState):
+        if not compliance_state.COMPLIANT:
+            for idx, pixel in enumerate(pixels):
+                self.neopixel_client[pixel] = (0,0,0)
+            return
+        
         base_color = (255, 255, 255) if compliance_state.COMPLIANT else (100, 255, 0)  # white for compliant, red for non-compliant
         c_time = time.time()
         for idx, pixel in enumerate(pixels):
@@ -53,11 +58,12 @@ class NeopixelInterface():
             adjusted_color = tuple(int(value * intensity_factor) for value in base_color)
             self.neopixel_client[pixel] = adjusted_color
 
-    def update_sec_group_pixels(self, pixels: list[int], compliance_state: types.ServiceState):
+    def update_ingoing_pixels(self, pixels: list[int], compliance_state: types.ServiceState):
+        if compliance_state.COMPLIANT:
+            return
+        
         base_color = (0, 0, 255) if compliance_state.COMPLIANT else (0, 255, 0)  # white for compliant, red for non-compliant
-
-        if not compliance_state.COMPLIANT:
-            base_color = (base_color[0] * self.current_intensity / 255, base_color[1] * self.current_intensity / 255, base_color[2] * self.current_intensity / 255 )
+        base_color = (base_color[0] * self.current_intensity / 255, base_color[1] * self.current_intensity / 255, base_color[2] * self.current_intensity / 255 )
         
         for idx, pixel in enumerate(pixels):
             self.neopixel_client[pixel] = base_color

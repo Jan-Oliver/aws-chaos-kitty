@@ -2,7 +2,8 @@
 import signal
 import sys
 import os
-import time 
+import time
+import keyboard
 
 from typing import List
 from uuid import uuid4
@@ -18,17 +19,18 @@ import src.utils.types as types
 global_compliance_state: types.ComplianceState = types.ComplianceState(
     igw_compliant = types.ServiceState(), # Not yet part of experiment
     alb_sec_group_compliant = types.ServiceState(),
-    alb_compliant = types.ServiceState(True), # Not yet part of experiment
+    alb_compliant = types.ServiceState(), # Not yet part of experiment
     cloud_trail_compliant = types.ServiceState(),
     asg_sec_group_compliant = types.ServiceState(),
     ec2_instance_2a_compliant = types.ServiceState(),
-    ec2_instance_2a_sec_group = types.ServiceState(True), # Not yet part of experiment
+    ec2_instance_2a_sec_group = types.ServiceState(), # Not yet part of experiment
     ec2_instance_2b_compliant = types.ServiceState(),
-    ec2_instance_2b_sec_group = types.ServiceState(True), # Not yet part of experiment
+    ec2_instance_2b_sec_group = types.ServiceState(), # Not yet part of experiment
     rds_db_compliant = types.ServiceState(),
     rds_sec_group_compliant = types.ServiceState(),
+    rds_replication_compliant = types.ServiceState(), # Not yet part of experiment
     s3_bucket_compliant = types.ServiceState(),
-    general_connection = types.ServiceState()
+    general_connection = types.ServiceState() # General connection that will not be updated by experiment
 )
 
 def create_signal_handler(
@@ -118,7 +120,7 @@ igw_component : architecture.ArchitectureComponent = architecture.ArchitectureCo
     neopixel_client = neopixel_client,
     component_connections=[types.ConnectionComponent("igw_compliant", [56, 57, 58, 59])],
     ingoing_connections=[],
-    outgoing_connections=[types.ConnectionComponent("general_connection", [55])],
+    outgoing_connections=[types.ConnectionComponent("general_connection", [55, 54])],
 )
 
 alb_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
@@ -132,40 +134,45 @@ alb_component : architecture.ArchitectureComponent = architecture.ArchitectureCo
 ec2_az1_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
     component_connections=[types.ConnectionComponent("ec2_instance_2a_compliant", [36, 37, 38, 39, 105, 106])],
-    ingoing_connections=[types.ConnectionComponent("ec2_instance_2a_sec_group", [40])],
-    outgoing_connections=[types.ConnectionComponent("general_connection", [104, 103, 102]), # (EC2 AZ1 -> RDS AZ1)
-                          types.ConnectionComponent("general_connection", [35, 34, 33, 32, 31, 30, 29, 28, 27,26, 25, 24, 23, 22])] # (EC2 AZ1 -> RDS AZ2)
+    ingoing_connections=[types.ConnectionComponent("ec2_instance_2a_sec_group", [41, 40])],
+    outgoing_connections=[types.ConnectionComponent("general_connection", [104, 103, 102, 101]), # (EC2 AZ1 -> RDS AZ1)
+                          types.ConnectionComponent("general_connection", [35, 34, 33, 32, 31, 30, 29, 28, 27,26, 25, 24, 23, 22, 21])] # (EC2 AZ1 -> RDS AZ2)
 )
 
 ec2_az2_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
     component_connections=[types.ConnectionComponent("ec2_instance_2b_compliant", [79, 80, 81, 82, 83])],
-    ingoing_connections=[types.ConnectionComponent("ec2_instance_2b_sec_group", [78])],
-    outgoing_connections=[types.ConnectionComponent("general_connection", [107, 108, 109]), # (EC2 AZ2 -> RDS AZ2)
-                          types.ConnectionComponent("general_connection", [85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96])] # (EC2 AZ2 -> RDS AZ1)
+    ingoing_connections=[types.ConnectionComponent("ec2_instance_2b_sec_group", [77, 78])],
+    outgoing_connections=[types.ConnectionComponent("general_connection", [107, 108, 109, 110]), # (EC2 AZ2 -> RDS AZ2)
+                          types.ConnectionComponent("general_connection", [85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97])] # (EC2 AZ2 -> RDS AZ1)
 )
 
 rds_az1_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
     component_connections=[types.ConnectionComponent("rds_db_compliant", [1, 2, 3, 100, 99, 98])],
-    ingoing_connections=[types.ConnectionComponent("rds_sec_group_compliant", [101]),
-                         types.ConnectionComponent("rds_sec_group_compliant", [97]),
-                         # types.ConnectionComponent("rds_sec_group_compliant", [4]) - Connection between RDS
-                         ],       
-    outgoing_connections=[types.ConnectionComponent("general_connection", [4, 5, 6, 7, 8, 9, 10])]
+    ingoing_connections=[types.ConnectionComponent("rds_sec_group_compliant", [102, 101]),
+                         types.ConnectionComponent("rds_sec_group_compliant", [96, 97])],       
+    outgoing_connections=[types.ConnectionComponent("rds_replication_compliant", [4, 5, 6, 7, 8, 9, 10])]
 )
 
 rds_az2_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
     component_connections=[types.ConnectionComponent("rds_db_compliant", [16, 17, 18, 19, 20, 112, 111])],
-    ingoing_connections=[types.ConnectionComponent("rds_sec_group_compliant", [110]),
-                         types.ConnectionComponent("rds_sec_group_compliant", [21]),
-                         # types.ConnectionComponent("rds_sec_group_compliant", [15]) - Connection between RDS
-                         ],
-    outgoing_connections=[types.ConnectionComponent("general_connection", [15, 14, 13, 12, 11, 10])]
+    ingoing_connections=[types.ConnectionComponent("rds_sec_group_compliant", [109, 110]),
+                         types.ConnectionComponent("rds_sec_group_compliant", [22, 21])],
+    outgoing_connections=[types.ConnectionComponent("rds_replication_compliant", [15, 14, 13, 12, 11, 10])]
 )
 
-
+# TODO: Fix this with global per Connection Component State or something. Per connection we can
+# specify the behaviour we want
+# Dirty hack to overwrite all of the connections when replication is off.
+rds_no_replication_component: architecture.ArchitectureComponent = architecture.ArchitectureComponent(
+    neopixel_client = neopixel_client,
+    component_connections=[types.ConnectionComponent("rds_replication_compliant", [16, 17, 18, 19, 20, 112, 111])],
+    ingoing_connections=[],
+    outgoing_connections=[types.ConnectionComponent("rds_replication_compliant", [107, 108, 109, 110]),
+                          types.ConnectionComponent("rds_replication_compliant", [35, 34, 33, 32, 31, 30, 29, 28, 27,26, 25, 24, 23, 22, 21])]
+)
 
 #
 architecture_components: List[architecture.ArchitectureComponent] = [
@@ -173,16 +180,23 @@ architecture_components: List[architecture.ArchitectureComponent] = [
     cloudtrail_component,
     igw_component,
     alb_component,
+    ec2_az1_component,
+    ec2_az2_component,
     rds_az1_component,
     rds_az2_component,
-    ec2_az1_component,
-    ec2_az2_component
+    rds_no_replication_component,
 ]
 
 
 signal.signal(signal.SIGINT, create_signal_handler(mqtt_client, neopixel_client))
+signal.signal(signal.SIGTERM, create_signal_handler(mqtt_client, neopixel_client))
 
+current_time = time.time()
 while True:
     for architecture_component in architecture_components:
         architecture_component.update(global_compliance_state)
     neopixel_client.show_changes()
+
+    if keyboard.is_pressed("ctrl") and keyboard.is_pressed("q"):
+        print("Stopping script execution")
+        os.kill(os.getpid(), signal.SIGTERM)
