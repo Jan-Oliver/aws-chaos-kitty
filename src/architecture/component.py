@@ -46,9 +46,13 @@ class ArchitectureComponent():
             state_id = component_connection.state_id
             pixels = component_connection.pixels
             compliance_state = getattr(global_compliance_state, state_id)
-            self.neopixel_client.update_component_pixels(pixels, compliance_state)
+            if state_id in ["ec2_instance_2b_compliant", "ec2_instance_2a_compliant", "rds_db_compliant"]:
+                self.neopixel_client.update_component_pixels_orange(pixels, compliance_state)
+            else:
+                self.neopixel_client.update_component_pixels(pixels, compliance_state)
+
 
     def update(self, global_compliance_state: types.ComplianceState):
-        self._update_ingoing_connections(global_compliance_state)
         self._update_outgoing_connections(global_compliance_state)
+        self._update_ingoing_connections(global_compliance_state)
         self._update_component_connections(global_compliance_state)

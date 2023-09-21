@@ -126,14 +126,14 @@ igw_component : architecture.ArchitectureComponent = architecture.ArchitectureCo
 alb_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
     component_connections=[types.ConnectionComponent("alb_compliant", [50, 51, 52, 53, 68])],
-    ingoing_connections=[types.ConnectionComponent("alb_sec_group_compliant", [54])],
+    ingoing_connections=[types.ConnectionComponent("alb_sec_group_compliant", [55, 54])], # Added 55
     outgoing_connections=[types.ConnectionComponent("general_connection", [49, 48, 47, 46, 45, 44, 43, 42, 41, 40]), # (ALB -> EC2 AZ1)
                           types.ConnectionComponent("general_connection", [69, 70, 71, 72, 73, 74, 75, 76, 77, 78 ])] # (ALB -> EC2 AZ2)
 )
 
 ec2_az1_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
-    component_connections=[types.ConnectionComponent("ec2_instance_2a_compliant", [36, 37, 38, 39, 105, 106])],
+    component_connections=[types.ConnectionComponent("ec2_instance_2a_compliant", [36, 37, 38, 39, 105])],
     ingoing_connections=[types.ConnectionComponent("ec2_instance_2a_sec_group", [41, 40])],
     outgoing_connections=[types.ConnectionComponent("general_connection", [104, 103, 102, 101]), # (EC2 AZ1 -> RDS AZ1)
                           types.ConnectionComponent("general_connection", [35, 34, 33, 32, 31, 30, 29, 28, 27,26, 25, 24, 23, 22, 21])] # (EC2 AZ1 -> RDS AZ2)
@@ -141,7 +141,7 @@ ec2_az1_component : architecture.ArchitectureComponent = architecture.Architectu
 
 ec2_az2_component : architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
-    component_connections=[types.ConnectionComponent("ec2_instance_2b_compliant", [79, 80, 81, 82, 83])],
+    component_connections=[types.ConnectionComponent("ec2_instance_2b_compliant", [79, 80, 81, 82, 83, 106])],
     ingoing_connections=[types.ConnectionComponent("ec2_instance_2b_sec_group", [77, 78])],
     outgoing_connections=[types.ConnectionComponent("general_connection", [107, 108, 109, 110]), # (EC2 AZ2 -> RDS AZ2)
                           types.ConnectionComponent("general_connection", [85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97])] # (EC2 AZ2 -> RDS AZ1)
@@ -168,8 +168,10 @@ rds_az2_component : architecture.ArchitectureComponent = architecture.Architectu
 # Dirty hack to overwrite all of the connections when replication is off.
 rds_no_replication_component: architecture.ArchitectureComponent = architecture.ArchitectureComponent(
     neopixel_client = neopixel_client,
-    component_connections=[types.ConnectionComponent("rds_replication_compliant", [16, 17, 18, 19, 20, 112, 111])],
-    ingoing_connections=[],
+    component_connections=[],
+    ingoing_connections=[types.ConnectionComponent("rds_sec_group_compliant", [109, 110]),
+                         types.ConnectionComponent("rds_sec_group_compliant", [22, 21]),
+                         types.ConnectionComponent("rds_replication_compliant", [16, 17, 18, 19, 20, 112, 111])],
     outgoing_connections=[types.ConnectionComponent("rds_replication_compliant", [107, 108, 109, 110]),
                           types.ConnectionComponent("rds_replication_compliant", [35, 34, 33, 32, 31, 30, 29, 28, 27,26, 25, 24, 23, 22, 21])]
 )

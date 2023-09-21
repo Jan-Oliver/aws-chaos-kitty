@@ -10,8 +10,6 @@ Lifecycle Connection Failure
 Connection failed with exception: AWS_IO_DNS_QUERY_FAILED: A query to dns failed to resolve.
 Lifecycle Connection Failure
 Connection failed with exception: AWS_IO_DNS_QUERY_FAILED: A query to dns failed to resolve.
-Lifecycle Connection Failure
-Connection failed with exception: AWS_IO_DNS_QUERY_FAILED: A query to dns failed to resolve.
 Lifecycle Connection Success
 Connected to endpoint: a2f97hrgv6egz9-ats.iot.eu-central-1.amazonaws.com with client ID 'Raspi4' with reason_code:<ConnectReasonCode.SUCCESS: 0>
 Subscribing to topic 'aws/bulb/+'...

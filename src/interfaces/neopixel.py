@@ -54,7 +54,7 @@ class NeopixelInterface():
         for idx, pixel in enumerate(pixels):
             # Create a moving effect using the intensity wheel and time
             # Add idx to make it "move" in the other direction
-            intensity_factor = self.int_values[int((c_time * 10 - idx) % self.len_int_values)] / 255.0  # multipled time with 2 to speed up movement
+            intensity_factor = self.int_values[int((c_time * 20 - idx) % self.len_int_values)] / 255.0  # multipled time with 2 to speed up movement
             adjusted_color = tuple(int(value * intensity_factor) for value in base_color)
             self.neopixel_client[pixel] = adjusted_color
 
@@ -70,6 +70,15 @@ class NeopixelInterface():
 
     def update_component_pixels(self, pixels: list[int], compliance_state: types.ServiceState):
         base_color = (255, 0, 0) if compliance_state.COMPLIANT else (0, 255, 0)  # white for compliant, red for non-compliant
+
+        if not compliance_state.COMPLIANT:
+            base_color = (base_color[0] * self.current_intensity / 255, base_color[1] * self.current_intensity / 255, base_color[2] * self.current_intensity / 255 )
+        
+        for pixel in pixels:
+            self.neopixel_client[pixel] = base_color
+
+    def update_component_pixels_orange(self, pixels: list[int], compliance_state: types.ServiceState):
+        base_color = (255, 0, 0) if compliance_state.COMPLIANT else (50, 255, 0)  #
 
         if not compliance_state.COMPLIANT:
             base_color = (base_color[0] * self.current_intensity / 255, base_color[1] * self.current_intensity / 255, base_color[2] * self.current_intensity / 255 )

@@ -30,12 +30,12 @@ MQTT_CLIENT_SUBSCRIPTION_PAYLOAD_COMPLIANT = 'green'
 
 # Mapping of ID of iot core messaging to aws architecture
 MQTT_ID_TO_STATE_MAPPING = {
-    31: "alb_sec_group_compliant",      # Opens the security group for all incoming traffic. Port 22
-    32: "cloud_trail_compliant",        # Turn off Cloud Trail 
-    33: "asg_sec_group_compliant",      # Opens the security group for all incoming traffic. Port 22
-    34: "ec2_instance_2a_compliant",    # Changes role to give S3 Full Access (Called "S3 Unsafe Role")
-    35: "ec2_instance_2b_compliant",    # Changes role to give S3 Full Access (Called "S3 Unsafe Role")
-    36: "rds_db_compliant",             # Adapt the authentication such that IAM authentication is no longer working...
-    37: "rds_sec_group_compliant",      # Opens the security group for all incoming traffic. Port 3306
-    38: "s3_bucket_compliant",          # Turns of public access block
+    31: "alb_sec_group_compliant",      # Opens the security group for all incoming traffic. Port 22 -> Tested
+    32: "cloud_trail_compliant",        # Turn off Cloud Trail -> Tested
+    33: "asg_sec_group_compliant",      # Opens the security group for all incoming traffic. Port 22 -> Not in architecture
+    34: "ec2_instance_2a_compliant",    # Changes role to give S3 Full Access (Called "S3 Unsafe Role") -> Tested
+    35: "ec2_instance_2b_compliant",    # Changes role to give S3 Full Access (Called "S3 Unsafe Role") -> Tested
+    36: "rds_db_compliant",             # Adapt the authentication such that IAM authentication is no longer working... -> Tested
+    37: "rds_sec_group_compliant",      # Opens the security group for all incoming traffic. Port 3306 -> Tested
+    38: "s3_bucket_compliant",          # Turns of public access block -> Only webapp static files  -> Tested
 }
